@@ -28,26 +28,30 @@
 		</div>
 		<button v-on:click="showResult"	>Рекорды</button>
 	</div>
+
 	<div v-else-if="show==='win'" class="formWinner">
 		<h1>Победа!!!</h1>
-		<form v-show="show" id="v-model-basic" class="stylesForm">
+		<form v-show="show" id="v-model-basic">
 			<fieldset>
 				<legend>Сохранить результат?</legend>
 				<label for="userName">Имя </label>
 				<input v-model="userName" placeholder="Имя" name="userName" required/>
-
+				<hr>
 				<label for="userEmail">Почта </label>
 				<input v-model="userEmail" placeholder="email" name="userEmail" required/>
-
+				<hr>
 				<p>Количество ходов: {{ clicks }}</p> 
-				
+				<hr>
 				<button  v-on:click.prevent="saveResult" type="submit" value="Отправить">Сохранить</button>
 				<button  v-on:click.prevent="closeForm"  value="Отправить">Закрыть</button>
 			</fieldset>
 		</form>
 	</div>
+
 	<div v-else-if="show==='result'" class="formResult">
-		<table>
+		
+		<table cellpadding="20"  >
+			<caption>Результаты:</caption>
 			<tr v-for="user in users" :key="user.id">
 				<td>{{ user.name }}</td>
 				<td>{{ user.email }}</td>
@@ -71,11 +75,7 @@ export default {
 		
 			clicks: 0,			
 			startGame: false,		
-			show: 'start',			
-			stylesForm:{
-				'showForm': false,
-				'result-form': true,
-			},			
+			show: 'start',						
 			userName: '',
 			userEmail:'',
 			newUser: {},
@@ -171,7 +171,7 @@ export default {
 					email: this.userEmail,
 					clicks: this.clicks,	
 			};
-						
+
 			this.users.push(this.newUser);
 			this.show = 'start';
 			this.userName = '';
@@ -333,14 +333,52 @@ export default {
 	display: none;
 }
 
-.formResult{
-	opacity: 100%;
-	border: 1px solid black;
+.formWinner{	
+	margin: auto;
+	font-size: 20px;	
+	text-align: center;
 	width: 500px;
+	height: 300px;		
+	user-select: none;
+  touch-action: none;	
+		
 }
 
-.formWinner{
-	width: 500px;
+.formWinner input{
+	margin: 10px;
+	width: 200px;;
 }
+.formWinner button{
+	width: 100px;
+	margin: 10px;
+}
+
+hr{
+	opacity: 10%;
+}
+
+.formResult{
+	
+	margin: 30px auto;
+	font-size: 20px;	
+	text-align: center;	
+	border: 4mm ridge rgba(3, 236, 23, 0.6);
+	
+}
+table{
+	margin: auto;
+}
+.formResult td{
+	width: auto;
+	text-align:start;
+	border: 0.5px solid black;
+}
+
+.formResult button{
+	width: 100px;
+	height: 30px;
+	margin: 10px;
+}
+
 
 </style>
