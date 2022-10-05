@@ -1,125 +1,193 @@
-<template>
-	<h1 class="name-game">
-		Пятнашки
-	</h1>
-	<div class="game__btn">
-		<button v-on:click="restart">Restart</button>
-		<button v-on:click="start" :class="styles">Start</button>
-		<button v-on:click="easyStart" :class="styles">Easy</button>
-		<button v-on:click="test" :class="styles">Test</button>
+<template >
+	<div v-if="show==='start'">
+		<h1 class="name-game">
+			Пятнашки
+		</h1>
+		<div class="game__btn">
+			<button v-on:click="restart">Restart</button>
+			<button v-on:click="start" :class="btnStyles">Start</button>
+			<button v-on:click="easyStart" :class="btnStyles">Easy</button>
+			<button v-on:click="test" :class="btnStyles">Test</button>
+		</div>
+		<div class="game-field">
+			<div>
+				<div v-for="(cube, index) in cubes" :key="index"
+					v-on:click="swap"				
+					class="game-field__cube" 				
+					:class=" {
+						'pos0': index === 0, 'pos1': index === 1, 'pos2': index === 2, 'pos3': index === 3,
+						'pos4': index === 4, 'pos5': index === 5, 'pos6': index === 6, 'pos7': index === 7,	
+						'pos8': index === 8, 'pos9': index === 9, 'pos10': index === 10, 'pos11': index === 11,
+						'pos12': index === 12, 'pos13': index === 13, 'pos14': index === 14, 'pos15': index === 15, 							
+				}" 
+				>{{ cube }} </div>
+			</div>		
+		</div>
+		<div class="game-click">
+				<p>Количество ходов: {{ clicks }}</p> 
+		</div>
+		<button v-on:click="showResult"	>Рекорды</button>
 	</div>
-	<div class="game-field" >
-		<div>
-			<div v-for="(cube, index) in cubes" :key="index"
-				v-on:click="swap"
-			  class="game-field__cube" 
-			  :class="{ 'pos0': index === 0, 'pos1': index === 1, 'pos2': index === 2, 'pos3': index === 3,
-									'pos4': index === 4, 'pos5': index === 5, 'pos6': index === 6, 'pos7': index === 7,	
-				 					'pos8': index === 8, 'pos9': index === 9, 'pos10': index === 10, 'pos11': index === 11,
-									'pos12': index === 12, 'pos13': index === 13, 'pos14': index === 14, 'pos15': index === 15, 							
-			}" 
-			>{{ cube }} </div>
-		</div>		
-	</div>
-	<div class="game-click">
-			Clicks: {{ clicks }}		
-	</div>
-	<div class="game-records">
-			Record: {{ record }}		
-	</div>
+	<div v-else-if="show==='win'" class="formWinner">
+		<h1>Победа!!!</h1>
+		<form v-show="show" id="v-model-basic" class="stylesForm">
+			<fieldset>
+				<legend>Сохранить результат?</legend>
+				<label for="userName">Имя </label>
+				<input v-model="userName" placeholder="Имя" name="userName" required/>
 
+				<label for="userEmail">Почта </label>
+				<input v-model="userEmail" placeholder="email" name="userEmail" required/>
+
+				<p>Количество ходов: {{ clicks }}</p> 
+				
+				<button  v-on:click.prevent="saveResult" type="submit" value="Отправить">Сохранить</button>
+				<button  v-on:click.prevent="closeForm"  value="Отправить">Закрыть</button>
+			</fieldset>
+		</form>
+	</div>
+	<div v-else-if="show==='result'" class="formResult">
+		<table>
+			<tr v-for="user in users" :key="user.id">
+				<td>{{ user.name }}</td>
+				<td>{{ user.email }}</td>
+				<td>{{ user.clicks }}</td>						
+			</tr>
+		</table>
+		<button  v-on:click.prevent="closeForm"  value="Отправить">Закрыть</button>
+	</div>
 </template>
 
-<script>
-export default {
-	data() {
-		return {
-			cubes: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, " "],
-			styles:{
-				hidden: false,
-			},
-			clicks: 0,
-			record: 500,
-		}	
-	},
 
-	computed: {
-		addClassCube() {							
-			return 	this.cubes.index;			
-		},		
-	},
+<script>
+export default {	
+	data() {		
+		return {
+			show: 1,
+			cubes: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, " "],
+			btnStyles:{
+				hidden: false,
+		},				
+		
+			clicks: 0,			
+			startGame: false,		
+			show: 'start',			
+			stylesForm:{
+				'showForm': false,
+				'result-form': true,
+			},			
+			userName: '',
+			userEmail:'',
+			newUser: {},
+			users: [
+				{
+					id: 1,
+					name: 'Имя', 
+					email: 'Почта',
+					clicks: 'Ходы',					
+				}
+			],		
+		}	
+	},	
 
 	methods: {
 
-		start()  {			
+		start() {			
 			this.clicks = 0;
-			for (let i = 1000; i > 0; i--) {   //Тасование Фишера — Йетса 		  
+			this.startGame = true;
+			this.btnStyles.hidden = true;
+
+				for (let i = 1000; i > 0; i--) {   //Тасование Фишера — Йетса 		  
+					this.x = Math.floor(Math.random() * 16);
+					this.y = this.cubes.indexOf(" ");
+					this.z = this.cubes[this.x];
+
+					if (this.x - this.y === 1 || this.x - this.y === -1|| this.x - this.y === 4 || this.x - this.y === -4) {						
+						this.cubes.splice(this.x, 1, " ");
+						this.cubes.splice(this.y, 1, this.z);											
+					}	   					
+				}			
+			},	
+
+		easyStart() {			
+			this.clicks = 0;
+			this.startGame = true;
+			this.btnStyles.hidden = true;
+			
+			for (let i = 33; i > 0; i--) {				
 				this.x = Math.floor(Math.random() * 16);
 				this.y = this.cubes.indexOf(" ");
-				this.z = this.cubes[this.x];
-
-				if (this.x - this.y === 1 || this.x - this.y === -1|| this.x - this.y === 4 || this.x - this.y === -4) {
-					this.cubes.splice(this.x, 1, " ");
-					this.cubes.splice(this.y, 1, this.z);
-					this.styles.hidden = true;					
-				}	   					
- 	 		}			
-		},
-
-		easyStart()  {			
-			this.clicks = 0;
-			for (let i = 33; i > 0; i--) {   //Тасование Фишера — Йетса 		  
-				this.x = Math.floor(Math.random() * 16);
-				this.y = this.cubes.indexOf(" ");
-				this.z = this.cubes[this.x];
-
-				if (this.x - this.y === 1 || this.x - this.y === -1|| this.x - this.y === 4 || this.x - this.y === -4) {
-					this.cubes.splice(this.x, 1, " ");
-					this.cubes.splice(this.y, 1, this.z);
-					this.styles.hidden = true;					
-				}	   					
- 	 		}			
+				this.z = this.cubes[this.x];							
+				
+				if (this.x - this.y === 1 || this.x - this.y === -1|| this.x - this.y === 4 || this.x - this.y === -4) {	
+					this.cubes.splice(this.x, 1, " ");				
+					this.cubes.splice(this.y, 1, this.z);										
+				}
+			}	
 		},
 
 		test() {
+			this.startGame = true;
+			this.btnStyles.hidden = true;
 			this.cubes = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, " "],
 			this.cubes.splice(14, 1, " ");
-			this.cubes.splice(15, 1, 15);
-			this.styles.hidden = true;
+			this.cubes.splice(15, 1, 15);			
 			this.clicks = 0;
 		},
 		
 		restart() {
+			this.startGame = false;
 			this.cubes = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, " "];
-			this.styles.hidden = false;
+			this.btnStyles.hidden = false;
 			this.clicks = 0;
 		},
 
-    swap(event) {			
-			this.x = this.cubes.indexOf(+event.target.innerHTML);
-			this.y = this.cubes.indexOf(" ");
-			this.z = this.cubes[this.x]
-			if (this.x - this.y === 1 || this.x - this.y === -1|| this.x - this.y === 4 || this.x - this.y === -4) {
-				this.cubes.splice(this.x, 1, " ");
-				this.cubes.splice(this.y, 1, this.z);
-				this.clicks += 1;
-			}		
-			if (this.finish()){
-				alert("Победа");
-				if (this.clicks < this.record){
-					this.record = this.clicks;
-					alert(`'Новый рекорд: ' ${this.record}`);
-				}
-			};
+    swap(event) {		
+			if (this.startGame){
+				this.x = this.cubes.indexOf(+event.target.innerHTML);
+				this.y = this.cubes.indexOf(" ");
+				this.z = this.cubes[this.x]
+				if (this.x - this.y === 1 || this.x - this.y === -1|| this.x - this.y === 4 || this.x - this.y === -4) {
+					this.cubes.splice(this.x, 1, " ");
+					this.cubes.splice(this.y, 1, this.z);
+					this.clicks += 1;
+				}		
+				if (this.finish()){
+					this.show = 'win';
+										
+				};
+			};	
 		},
 
-		finish(){
+		finish() {
 			return  this.cubes.every((value, index) => value === [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, " "][index]);
+		},
+
+		saveResult() {
+			
+			this.newUser = {
+					id: (this.users.at(-1).id + 1),
+					name: this.userName, 
+					email: this.userEmail,
+					clicks: this.clicks,	
+			};
+						
+			this.users.push(this.newUser);
+			this.show = 'start';
+			this.userName = '';
+			this.userEmail = '';
+		},
+
+		closeForm(){
+			this.show = 'start';
+		},
+
+		showResult(){
+			this.show = 'result';
 		}
 	}
 }	
 </script>
-
 
 
 <style>
@@ -135,21 +203,25 @@ export default {
 	height: 370px;
 	border: 5px solid darkblue;
 	user-select: none;
-  touch-action: none;    
-	
+  touch-action: none;  	
 }
 
 .game-field__cube {
 	position: absolute;
-	font-size: 40px;
-	font-weight: bold;
+	font-size: 50px;	
 	text-align: center;
 	width: 80px;
 	height: 80px;
 	border: 2px solid black;
+	border-radius: 30%;
 	user-select: none;
   touch-action: none;	
-	color: black;
+	color: black;		
+}
+
+.game-field__cube:hover{
+	background: hsla(217, 25%, 82%, 0.849);
+  transition: background 1s ease-out;
 }
 
 .game__btn{
@@ -253,10 +325,22 @@ export default {
 	left: 280px;
 }
 
-
+.zero{
+	border: 0;
+}
 
 .hidden{
 	display: none;
+}
+
+.formResult{
+	opacity: 100%;
+	border: 1px solid black;
+	width: 500px;
+}
+
+.formWinner{
+	width: 500px;
 }
 
 </style>

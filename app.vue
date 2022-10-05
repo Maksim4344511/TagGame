@@ -2,4 +2,5 @@
   <div>
     <TheGame />
   </div>
+  
 </template>
