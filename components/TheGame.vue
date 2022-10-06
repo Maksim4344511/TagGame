@@ -94,7 +94,6 @@ export default {
 	},	
 
 	methods: {
-
 		start() {			
 			this.clicks = 0;
 			this.startGame = true;
