@@ -37,8 +37,8 @@
 				<label for="userName">Имя </label>
 				<input v-model="userName" placeholder="Имя" name="userName" required/>
 				<hr>
-				<label for="userEmail">Почта </label>
-				<input v-model="userEmail" placeholder="email" name="userEmail" required/>
+				<label for="userEmail">e-mail </label>
+				<input v-model="userEmail" placeholder="e-mail" name="userEmail" required/>
 				<hr>
 				<p>Количество ходов: {{ clicks }}</p> 
 				<hr>
@@ -50,7 +50,7 @@
 
 	<div v-else-if="show==='result'" class="formResult">
 		
-		<table cellpadding="20"  >
+		<table cellpadding="15"  >
 			<caption>Результаты:</caption>
 			<tr v-for="user in users" :key="user.id">
 				<td>{{ user.name }}</td>
@@ -83,10 +83,13 @@ export default {
 				{
 					id: 1,
 					name: 'Имя', 
-					email: 'Почта',
+					email: 'e-mail',
 					clicks: 'Ходы',					
 				}
-			],		
+			],	
+			regEmail: /^[A-Z0-9._%+-]+@[A-Z0-9-]+.+.[A-Z]{2,4}$/i,
+			regName: /^[a-z0-9_-]{1,16}$/,
+	
 		}	
 	},	
 
@@ -164,18 +167,25 @@ export default {
 		},
 
 		saveResult() {
-			
-			this.newUser = {
-					id: (this.users.at(-1).id + 1),
-					name: this.userName, 
-					email: this.userEmail,
-					clicks: this.clicks,	
+			if (this.regEmail.test(this.userEmail) === true){				
+				if (this.regName.test(this.userName)=== true){
+					this.newUser = {
+						id: (this.users.at(-1).id + 1),
+						name: this.userName, 
+						email: this.userEmail,
+						clicks: this.clicks,	
+					};
+					this.users.push(this.newUser);
+					this.show = 'start';
+					this.userName = '';
+					this.userEmail = '';
+				} else {
+					alert('Введите Ваше имя');
+				};
+			} else {
+				alert('Введите корректный e-mail');
 			};
-
-			this.users.push(this.newUser);
-			this.show = 'start';
-			this.userName = '';
-			this.userEmail = '';
+			
 		},
 
 		closeForm(){
@@ -233,8 +243,9 @@ export default {
 	margin-bottom: 20px;
 }
 
-.game__btn button{
+button{
 	width: 80px;
+	height: 30px;
 }
 
 .game-click{
